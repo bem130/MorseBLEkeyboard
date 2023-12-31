@@ -89,8 +89,9 @@ void loop() {
     // Serial.println( String(digitalRead(key1)) + " " + String(digitalRead(key2)) );
     delay(1);
 
+    /* key1 */
     if (key1_pressed) {
-        if (digitalRead(key1)!=PRESS) {
+        if (digitalRead(key1)!=PRESS) { // key1を離した時
             key1_pressed = false;
             int press_time = millis() - key1_press_t; // 押した時間
             if (press_time>threshold1) {
@@ -108,7 +109,7 @@ void loop() {
         }
     }
     else {
-        {
+        { // key1が押されていない時
             int release_time = millis() - key1_press_t; // 離した時間
             if ((release_time>threshold2||bufferindex>=8)&&bufferindex>=1) { // 入力を確定する条件 1.離す時間が長い 2.入力が8を超えた (3.入力がされている)
                 Serial.print("\n     [");
@@ -137,7 +138,7 @@ void loop() {
                 morse_space_flag = false;
             }
         }
-        if (digitalRead(key1)==PRESS) {
+        if (digitalRead(key1)==PRESS) { // key1を推した時
             key1_pressed = true;
             //Serial.print("    ");
             //Serial.println(release_time);
@@ -145,6 +146,8 @@ void loop() {
             morse_space_flag = false;
         }
     }
+
+    /* key2 */
     if (key2_pressed) {
         if (digitalRead(key2)!=PRESS) { // key2を離した時
             key2_pressed = false;
