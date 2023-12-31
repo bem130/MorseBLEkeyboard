@@ -1,109 +1,18 @@
-#include <Arduino.h>
-#include <BleKeyboard.h>
-
-#define key1 18
-#define key2 19
-
-#define PRESS 0
-
-/* one btn mode */
-    /* 押す時間 */
-    // short
-    #define threshold1 200
-    // long
-
-    /* 離す時間 */
-    // continue
-    #define threshold2 300
-    // confirm
-    #define threshold3 800
-    // confirm&space
-
-    /* バックスペースの繰り返し */
-    #define backspace_repeat 200
-
-void clearbuffer();
-int searchKeyCode_forMorse();
-
-static BleKeyboard blekb("Morse Keyboard");
-
-
-bool key1_pressed;
-bool key2_pressed;
-ulong key1_press_t;
-ulong key2_press_t;
-
-int inputbuffer[8]; // 入力
-int bufferindex;
-
-bool morse_space_flag;
-
-#define morseinput_len 51
-int morseinput[morseinput_len][10] = {
-    {8, 8, 1,1,1,1,1,1,1,1}, // BS
-    {65, 2, 1,2,0,0,0,0,0,0}, // A
-    {66, 4, 2,1,1,1,0,0,0,0}, // B
-    {67, 4, 2,1,2,1,0,0,0,0}, // C
-    {68, 3, 2,1,1,0,0,0,0,0}, // D
-    {69, 1, 1,0,0,0,0,0,0,0}, // E
-    {70, 4, 1,1,2,1,0,0,0,0}, // F
-    {71, 3, 2,2,1,0,0,0,0,0}, // G
-    {72, 4, 1,1,1,1,0,0,0,0}, // H
-    {73, 2, 1,1,0,0,0,0,0,0}, // I
-    {74, 4, 1,2,2,2,0,0,0,0}, // J
-    {75, 3, 2,1,2,0,0,0,0,0}, // K
-    {76, 4, 1,2,1,1,0,0,0,0}, // L
-    {77, 2, 2,2,0,0,0,0,0,0}, // M
-    {78, 2, 2,1,0,0,0,0,0,0}, // N
-    {79, 3, 2,2,2,0,0,0,0,0}, // O
-    {80, 4, 1,2,2,1,0,0,0,0}, // P
-    {81, 4, 2,2,1,2,0,0,0,0}, // Q
-    {82, 3, 1,2,1,0,0,0,0,0}, // R
-    {83, 3, 1,1,1,0,0,0,0,0}, // S
-    {84, 1, 2,0,0,0,0,0,0,0}, // T
-    {85, 3, 1,1,2,0,0,0,0,0}, // U
-    {86, 4, 1,1,1,2,0,0,0,0}, // V
-    {87, 3, 1,2,2,0,0,0,0,0}, // W
-    {88, 4, 2,1,1,2,0,0,0,0}, // X
-    {89, 4, 2,1,2,2,0,0,0,0}, // Y
-    {90, 4, 2,2,1,1,0,0,0,0}, // Z
-    {49, 5, 1,2,2,2,2,0,0,0}, // 1
-    {50, 5, 1,1,2,2,2,0,0,0}, // 2
-    {51, 5, 1,1,1,2,2,0,0,0}, // 3
-    {52, 5, 1,1,1,1,2,0,0,0}, // 4
-    {53, 5, 2,1,1,1,2,0,0,0}, // 5
-    {54, 5, 2,2,1,1,1,0,0,0}, // 6
-    {55, 5, 2,2,1,1,1,0,0,0}, // 7
-    {56, 5, 2,2,2,1,1,0,0,0}, // 8
-    {57, 5, 2,2,2,2,1,0,0,0}, // 9
-    {48, 5, 2,2,2,2,2,0,0,0}, // 0
-    {46, 6, 1,2,1,2,1,2,0,0}, // .
-    {44, 6, 2,2,1,1,2,2,0,0}, // ,
-    {58, 6, 2,2,2,1,1,1,0,0}, // :
-    {63, 6, 1,1,2,2,1,1,0,0}, // ?
-    {95, 6, 1,1,2,2,1,2,0,0}, // _
-    {43, 5, 1,2,1,2,1,0,0,0}, // +
-    {45, 6, 2,1,1,1,1,2,0,0}, // -
-    {94, 6, 1,1,1,1,1,1,0,0}, // ^
-    {47, 5, 2,1,1,2,1,0,0,0}, // /
-    {64, 6, 1,2,2,1,2,1,0,0}, // @
-    {40, 5, 2,1,2,2,1,0,0,0}, // (
-    {41, 6, 2,1,2,2,1,2,0,0}, // )
-    {34, 6, 1,2,1,1,2,1,0,0}, // "
-    {39, 6, 1,2,2,2,2,1,0,0}, // '
-};
+#include "keysetting.h"
 
 
 void setup() {
     // put your setup code here, to run once:
-    blekb.begin();
     Serial.begin(115200);
+    blekb.begin();
     pinMode(key1,INPUT_PULLUP);
     pinMode(key2,INPUT_PULLUP);
     key1_pressed = false;
     key2_pressed = false;
     morse_space_flag = false;
-    clearbuffer();
+    auto_space = false;
+    clearbuffer1();
+    clearbuffer2();
 }
 
 void loop() {
@@ -121,110 +30,155 @@ void loop() {
             key1_pressed = false;
             int press_time = millis() - key1_press_t; // 押した時間
             if (press_time>threshold1) {
-                inputbuffer[bufferindex] = 2;
-                Serial.print("-");
+                inputbuffer1[buffer1index] = 2;
             }
             else {
-                inputbuffer[bufferindex] = 1;
-                Serial.print(".");
+                inputbuffer1[buffer1index] = 1;
             }
-            bufferindex++;
-            //Serial.print("    ");
-            //Serial.println(press_time);
+            buffer1index++;
             key1_press_t = millis();
         }
     }
     else {
         { // key1が押されていない時
             int release_time = millis() - key1_press_t; // 離した時間
-            if ((release_time>threshold2||bufferindex>=8)&&bufferindex>=1) { // 入力を確定する条件 1.離す時間が長い 2.入力が8を超えた (3.入力がされている)
-                Serial.print("\n     [");
+            if ((release_time>threshold2||buffer1index>=8)&&buffer1index>=1) { // 入力を確定する条件 1.離す時間が長い 2.入力が8を超えた (3.入力がされている)
                 int res = searchKeyCode_forMorse();
-                if (res==-1) {
-                    Serial.print("undefined");
-                }
-                else {
+                if (res!=-1) {
                     if (65<=res&&res<=90) {
                         res+=0x20;
-                        Serial.print((char)res);
-                    }
-                    else {
-                        Serial.print(res);
                     }
                     blekb.write(res); // キーを送信
                     morse_space_flag = true;
                 }
-                Serial.println("]");
-                clearbuffer();
+                clearbuffer1();
                 key1_press_t = millis();
             }
-            release_time = millis() - key1_press_t; // 離した時間
-            if (morse_space_flag&&release_time>=threshold3-threshold2) {
-                Serial.println("       <space>");
-                blekb.write(0x20); // スペースキーを送信
-                morse_space_flag = false;
+            if (auto_space) {
+                release_time = millis() - key1_press_t; // 離した時間
+                if (morse_space_flag&&release_time>=threshold3-threshold2) {
+                    blekb.write(0x20); // スペースキーを送信
+                    morse_space_flag = false;
+                }
             }
         }
-        if (digitalRead(key1)==PRESS) { // key1を推した時
+        if (digitalRead(key1)==PRESS) { // key1を押した時
             key1_pressed = true;
-            //Serial.print("    ");
-            //Serial.println(release_time);
             key1_press_t = millis();
             morse_space_flag = false;
         }
     }
 
     /* key2 */
-    if (key2_pressed) { // key2を押している時
-        {
-            int press_time = millis() - key2_press_t; // 押した時間
-            if (press_time>backspace_repeat) {
-                blekb.write(0x8); // バックスペースキーを送信
-                key2_press_t = millis(); // 押した時間を再設定
-            }
-        }
+    if (key2_pressed) {
         if (digitalRead(key2)!=PRESS) { // key2を離した時
             key2_pressed = false;
+            int press_time = millis() - key2_press_t; // 押した時間
+            if (press_time>threshold1) {
+                inputbuffer2[buffer2index] = 2;
+                Serial.print("-");
+            }
+            else {
+                inputbuffer2[buffer2index] = 1;
+                Serial.print(".");
+            }
+            buffer2index++;
+            key2_press_t = millis();
+            // 一個目が短点だったら、続きを見ず終了
+            if (buffer2index==1&inputbuffer2[0]==1) {
+                blekb.write(KEY_BACKSPACE); // バックスペースキーを送信
+                clearbuffer2();
+                Serial.println(" BS");
+            }
         }
     }
     else {
+        { // key2が押されていない時
+            int release_time = millis() - key2_press_t; // 離した時間
+            if ((release_time>threshold2||buffer2index>=5)&&buffer2index>=1) { // 入力を確定する条件 1.離す時間が長い 2.入力が8を超えた (3.入力がされている)
+                int res = searchKeyCode_forModifier();
+                if (res!=-1) {
+                    uint8_t key = modifierinput[res][0];
+                    int keytype = modifierinput[res][1];
+                    switch (keytype)
+                    {
+                        case 0:
+                            blekb.write(key); // キーを送信
+                        break;
+                        case 1:
+                            blekb.press(key); // キーを送信
+                        break;
+                        case 2:
+                            blekb.releaseAll();
+                        break;
+                        case 3:
+                            auto_space = key==UNABLE;
+                        break;
+                    }
+                    Serial.print(" ");
+                    Serial.print(keytype);
+                    Serial.print(" ");
+                    Serial.println(key);
+                }
+                else {
+                    Serial.print(" ");
+                    Serial.print(-1);
+                }
+                clearbuffer2();
+                key2_press_t = millis();
+            }
+        }
         if (digitalRead(key2)==PRESS) { // key2を押した時
+            morse_space_flag = false; // スペースを取り消す
             key2_pressed = true;
-            blekb.write(0x8); // バックスペースキーを送信
-            morse_space_flag = false; // スペースキーを取り消し
             key2_press_t = millis();
         }
     }
 
-
-    // if (digitalRead(key1)==PRESS) {
-    //     blekb.write(KEY_NUM_ENTER); // キーを送信
-    // }
-    // if (digitalRead(key2)==PRESS) {
-    //     blekb.write(65); // キーを送信
-    // }
-
 }
 
-void clearbuffer() {
-    bufferindex = 0;
+void clearbuffer1() {
+    buffer1index = 0;
     for (int i=0;i<8;i++) {
-        inputbuffer[i] = 0;
+        inputbuffer1[i] = 0;
+    }
+}
+void clearbuffer2() {
+    buffer2index = 0;
+    for (int i=0;i<5;i++) {
+        inputbuffer2[i] = 0;
     }
 }
 
 int searchKeyCode_forMorse() {
     for (int i=0;i<morseinput_len;i++) {
-        if (morseinput[i][1]==bufferindex) {
+        if (morseinput[i][1]==buffer1index) {
             bool flag = true;
-            for (int j=0;j<bufferindex;j++) {
-                if (morseinput[i][j+2]!=inputbuffer[j]) {
+            for (int j=0;j<buffer1index;j++) {
+                if (morseinput[i][j+2]!=inputbuffer1[j]) {
                     flag = false;
                     break;
                 }
             }
             if (flag) {
                 return morseinput[i][0];
+            }
+        }
+    }
+    return -1;
+}
+int searchKeyCode_forModifier() {
+    for (int i=0;i<modifierinput_len;i++) {
+        if (modifierinput[i][2]==buffer2index) {
+            bool flag = true;
+            for (int j=0;j<buffer2index;j++) {
+                if (modifierinput[i][j+3]!=inputbuffer2[j]) {
+                    flag = false;
+                    break;
+                }
+            }
+            if (flag) {
+                return i;
             }
         }
     }
