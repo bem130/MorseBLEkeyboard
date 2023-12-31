@@ -1,0 +1,58 @@
+\documentclass[a4paper,10.5pt]{ltjsarticle}
+\usepackage[margin=15truemm]{geometry}
+\usepackage{url}
+\usepackage{listings, jvlisting, color, graphicx}
+\usepackage{plantuml}
+\usepackage{tikz}
+
+\setcounter{secnumdepth}{6}
+\begin{document}
+
+\title{\Huge Morse BLE Keyboard}
+\author{\LARGE Bem130}
+\date{\number\year \slash \number\month \slash \number\day}
+
+\maketitle
+
+
+
+\begin{table}[h]
+    \centering
+    \scalebox{1.3}{
+        \begin{tabular}{|c|l|c|c|l|c|c|c|c|}
+            \hline
+            Key1 &  &  & Key1 &  &  & Key2 &  \\
+            \hline
+            A & ・－ &  & 1 & ・－－－－ &  & Enter & － \\
+            B & －・・・ &  & 2 & ・・－－－ &  & Space & －・ \\
+            C & －・－・ &  & 3 & ・・・－－ &  & CapsLock & －－ \\
+            D & －・・ &  & 4 & ・・・・－ &  & Shift & －・・ \\
+            E & ・ &  & 5 & ・・・・・ &  & Escape & －－・ \\
+            F & ・・－・ &  & 6 & －・・・・ &  & Tab & －－－ \\
+            G & －－・ &  & 7 & －－・・・ &  & Ctrl & －・・・ \\
+            H & ・・・・ &  & 8 & －－－・・ &  & Alt & －・・－ \\
+            I & ・・ &  & 9 & －－－－・ &  & Arrow UP & －－・・ \\
+            J & ・－－－ &  & 0 & －－－－－ &  & Arrow Down & －－・－ \\
+            K & －・－ &  & BS & ・・・・・・・・ &  & Arrow Left & －－－・ \\
+            L & ・－・・ &  & . & ・－・－・－ &  & Arrow Right & －－－－ \\
+            M & －－ &  & , & －－・・－－ &  & release & －－ \\
+            N & －・ &  & : & －－－・・・ &  & unable auto space & －・－・ \\
+            O & －－－ &  & ? & ・・－－・・ &  & disable auto space & －・－－ \\
+            P & ・－－・ &  & \_ & ・・－－・－ &  &  &  \\
+            Q & －－・－ &  & + & ・－・－・ &  &  &  \\
+            R & ・－・ &  & - & －・・・・－ &  &  &  \\
+            S & ・・・ &  & \textasciicircum & ・・・・・・ &  &  &  \\
+            T & － &  & / & －・・－・ &  &  &  \\
+            U & ・・－ &  & @ & ・－－・－・ &  &  &  \\
+            V & ・・・－ &  & ( & －・－－・ &  &  &  \\
+            W & ・－－ &  & ) & －・－－・－ &  &  &  \\
+            X & －・・－ &  & "  & ・－・・－・ &  &  &  \\
+            Y & －・－－ &  & ' & ・－－－－・ &  &  &  \\
+            Z & －－・・ &  &  &  &  &  &  \\
+            \hline
+        \end{tabular}
+    }
+\end{table}
+
+
+\end{document}

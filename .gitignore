@@ -4,3 +4,11 @@
 .vscode/launch.json
 .vscode/ipch
 README
+
+
+*.aux
+*.log
+*.fls
+*.fdb_latexmk
+*.pytxcode
+*.toc
