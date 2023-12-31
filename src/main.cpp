@@ -19,6 +19,8 @@
     #define threshold3 800
     // confirm&space
 
+    /* バックスペースの繰り返し */
+    #define backspace_repeat 200
 
 void clearbuffer();
 int searchKeyCode_forMorse();
@@ -148,7 +150,14 @@ void loop() {
     }
 
     /* key2 */
-    if (key2_pressed) {
+    if (key2_pressed) { // key2を押している時
+        {
+            int press_time = millis() - key2_press_t; // 押した時間
+            if (press_time>backspace_repeat) {
+                blekb.write(0x8); // バックスペースキーを送信
+                key2_press_t = millis(); // 押した時間を再設定
+            }
+        }
         if (digitalRead(key2)!=PRESS) { // key2を離した時
             key2_pressed = false;
         }
@@ -158,6 +167,7 @@ void loop() {
             key2_pressed = true;
             blekb.write(0x8); // バックスペースキーを送信
             morse_space_flag = false; // スペースキーを取り消し
+            key2_press_t = millis();
         }
     }
 
