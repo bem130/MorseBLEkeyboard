@@ -14,8 +14,10 @@
 
     /* 離す時間 */
     // continue
-    #define threshold2 200
+    #define threshold2 300
     // confirm
+    #define threshold3 800
+    // confirm&space
 
 
 void clearbuffer();
@@ -32,6 +34,7 @@ ulong key2_press_t;
 int inputbuffer[8]; // 入力
 int bufferindex;
 
+bool morse_space_flag;
 
 #define morseinput_len 27
 int morseinput[morseinput_len][10] = {
@@ -73,6 +76,7 @@ void setup() {
     pinMode(key2,INPUT_PULLUP);
     key1_pressed = false;
     key2_pressed = false;
+    morse_space_flag = false;
     clearbuffer();
 }
 
@@ -83,7 +87,7 @@ void loop() {
     }
 
     // Serial.println( String(digitalRead(key1)) + " " + String(digitalRead(key2)) );
-    delay(10);
+    delay(1);
 
     if (key1_pressed) {
         if (digitalRead(key1)!=PRESS) {
@@ -120,9 +124,17 @@ void loop() {
                         Serial.print(res);
                     }
                     blekb.write(res); // キーを送信
+                    morse_space_flag = true;
                 }
                 Serial.println("]");
                 clearbuffer();
+                key1_press_t = millis();
+            }
+            release_time = millis() - key1_press_t; // 離した時間
+            if (morse_space_flag&&release_time>=threshold3-threshold2) {
+                Serial.println("       <space>");
+                blekb.write(0x20);
+                morse_space_flag = false;
             }
         }
         if (digitalRead(key1)==PRESS) {
@@ -130,6 +142,7 @@ void loop() {
             //Serial.print("    ");
             //Serial.println(release_time);
             key1_press_t = millis();
+            morse_space_flag = false;
         }
     }
 
