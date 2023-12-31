@@ -133,7 +133,7 @@ void loop() {
             release_time = millis() - key1_press_t; // 離した時間
             if (morse_space_flag&&release_time>=threshold3-threshold2) {
                 Serial.println("       <space>");
-                blekb.write(0x20);
+                blekb.write(0x20); // スペースキーを送信
                 morse_space_flag = false;
             }
         }
@@ -143,6 +143,18 @@ void loop() {
             //Serial.println(release_time);
             key1_press_t = millis();
             morse_space_flag = false;
+        }
+    }
+    if (key2_pressed) {
+        if (digitalRead(key2)!=PRESS) { // key2を離した時
+            key2_pressed = false;
+        }
+    }
+    else {
+        if (digitalRead(key2)==PRESS) { // key2を押した時
+            key2_pressed = true;
+            blekb.write(0x8); // バックスペースキーを送信
+            morse_space_flag = false; // スペースキーを取り消し
         }
     }
 
